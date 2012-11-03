@@ -5,6 +5,7 @@ trait Eris {
 
   def mode: String
   def app_no: String
+  def hostname: String
 
 }
 

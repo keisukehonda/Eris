@@ -7,6 +7,7 @@ new Eris {
   //edit
   val mode = "node"
   val app_no = "app_1"
+  val hostname = "127.0.0.1"
 
 /*
   val hostname = "127.0.0.1"
