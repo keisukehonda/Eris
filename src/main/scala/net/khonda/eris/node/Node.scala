@@ -42,6 +42,26 @@ case class RoutingTable(version: Long,
 class Node(config: ErisConfig) {
   import Status._
 
+  val logger = LoggerFactory.getLogger(classOf[Node])  
+  val startTime =  java.util.Calendar.getInstance(new java.util.Locale("ja", "JP", "JP")) //TODO
+  val akkaConfig = ConfigFactory.load()
+  val port = ConfigFactory.load().getConfig(config.app_no).getInt("akka.remote.netty.port")
+  val system = ActorSystem("ChordSystem-"+port,
+			   ConfigFactory.load().getConfig(config.app_no).withFallback(akkaConfig))
+
+  val failureDetector = 
+    new AccrualFailureDetector(system, 
+			       config.failuredetector_threshold, 
+			       config.failuredetector_maxSampleSize, 
+			       config.failuredetector_minStdDeviation, 
+			       config.failuredetector_acceptableHeartbeatPause, 
+			       config.failuredetector_firstHeartbeatEstimate, 
+			       AccrualFailureDetector.realClock)
+  val router = Router(system, config, failureDetector)
+  // private val selfHeartbeat = Heartbeat(router.self)  
+  val lookupProxy = new LookupProxy(system, router)
+
+
 }
 
 object Router {
