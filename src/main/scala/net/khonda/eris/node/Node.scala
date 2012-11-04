@@ -1,6 +1,16 @@
 package net.khonda.eris.node
 
 import net.khonda.eris.config.{Eris => ErisConfig}
+import akka.actor._
+import akka.remote.RemoteScope
+import akka.util.duration._
+import com.typesafe.config.ConfigFactory
+import ch.qos.logback._
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import java.util.concurrent.atomic.AtomicReference
+import scala.annotation.tailrec
+import scala.xml.XML
 
 
 trait NodeMessage extends Serializable
@@ -29,7 +39,37 @@ case class RoutingTable(version: Long,
 			unreachable: Set[Route]) extends NodeMessage
 
 
-class Node {
+class Node(config: ErisConfig) {
+  import Status._
 
 }
 
+object Router {
+
+  def apply(system: ActorSystem, config: ErisConfig, failureDetector: FailureDetector) = {
+    new Router(system, config, failureDetector)
+  }
+
+}
+
+class Router private (system: ActorSystem, config: ErisConfig, failureDetector: FailureDetector) {
+  import Status._
+
+  val logger = LoggerFactory.getLogger(classOf[Router])
+  
+  case class State(rt: RoutingTable)
+
+  val state = {
+    val latest = RoutingTable(0L, List.empty, Set.empty)
+    new AtomicReference[State](State(latest))
+  }
+
+  lazy val self: Address = {
+    val port = ConfigFactory.load().getConfig(config.app_no).getInt("akka.remote.netty.port")
+    val local = config.getUri(config.hostname, port)
+    AddressFromURIString(local)
+  }
+
+  def currentTable: RoutingTable = state.get.rt
+  
+}
