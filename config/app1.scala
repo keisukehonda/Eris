@@ -10,6 +10,7 @@ new Eris {
   val hostname = "127.0.0.1"
   val port = 7919
   val lookup = ("127.0.0.1", 2519)
+  val autoJoin = true
   val db = ("127.0.0.1", 7819)
 
   val failuredetector_duration = (Duration(3000, "milliseconds"), Duration(4000, "milliseconds"))
