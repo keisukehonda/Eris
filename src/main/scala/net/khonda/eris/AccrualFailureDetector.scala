@@ -1,7 +1,7 @@
 /**
  * Copyright (C) 2009-2012 Typesafe Inc. <http://www.typesafe.com>
  */
-package net.khonda.eris.node
+package net.khonda.eris
 
 import akka.actor.{ ActorSystem, Address, ExtendedActorSystem }
 import akka.remote.RemoteActorRefProvider
