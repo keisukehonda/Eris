@@ -63,6 +63,11 @@ class Node(config: ErisConfig) {
   val lookupProxy = new LookupProxy(system, router)
   val stabilizer = new Stabilizer(system, router)
 
+  //gossip tick
+  private lazy val gossipTask = FixedRateTask(system.scheduler, 0 milliseconds, 2000 milliseconds) {    
+    gossipTick()
+  }
+
   //join to cluster using lookup node and check i am newcomer or rejoin
   val (accept, isReJoin) = join(AddressFromURIString(config.getUri(config.lookup._1, config.lookup._2)))
   
@@ -92,13 +97,18 @@ class Node(config: ErisConfig) {
 	if(router.nodeid.matches("""^[a-z0-9]{40}$""")) {
 	  //join and stabilizer start	
 	  logger.info("join as:"+router.nodeid)
-	  if(stabilizer.join(router.getSuccessor)) stabilizer.start(config.stabi_seq)
+	  if(stabilizer.join(router.getSuccessor)) gossipTask
 	  (true, isReJoin)
 	} else { logger.info("id is not valid:"+router.nodeid); (false, false) }	
       }
       case None => { logger.info("lookup fail"); (false, false) }
     }
   }
+
+  def gossipTick(): Unit = {    
+    stabilizer.gossip()
+  }
+  
 }
 
 object Router {

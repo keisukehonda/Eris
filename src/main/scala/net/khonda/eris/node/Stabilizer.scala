@@ -31,7 +31,7 @@ class Stabilizer(system: ActorSystem, router: Router) {
 
   // Create the master
   val master = system.actorOf(Props(new Master).withDeploy(Deploy(scope = RemoteScope(router.self))), name = "stabilizer")
-  var cancellable: Cancellable = null //system.scheduler.schedule(0 milliseconds, 1000 milliseconds, master, Stabilize)  
+  logger.info("Stabiliser start")  
   
   class Master extends Actor {
     import Status._
@@ -94,16 +94,10 @@ class Stabilizer(system: ActorSystem, router: Router) {
       case _ => false
     }
   }
-  
-  def start(seq: Duration): Unit = {
-    cancellable = system.scheduler.schedule(0 milliseconds, 
-					    seq, 
-					    master, 
-					    Stabilize)
-    logger.info("Stabiliser start")
+
+  def gossip(): Unit = {
+    println("stabli run gossip")
   }
-  
-  def cancel(): Unit = cancellable.cancel()
-    
+
 }
 
