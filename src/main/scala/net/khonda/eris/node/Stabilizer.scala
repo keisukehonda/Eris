@@ -20,9 +20,10 @@ case object Stabilize extends NodeMessage
 case class Join(from: Route) extends NodeMessage
 case class Heartbeat(from: Address) extends NodeMessage
 //local command
-case class Envelope(from: Route,  rt: RoutingTable) extends NodeMessage    
+case class Envelope(from: Route,  rt: RoutingTable) extends NodeMessage
 case class Response(b: Boolean, rt: RoutingTable) extends NodeMessage
 case class Accept(rt: RoutingTable) extends NodeMessage
+
 
 //Stabilize network usign Gossip protocol
 class Stabilizer(system: ActorSystem, router: Router) {
@@ -96,7 +97,17 @@ class Stabilizer(system: ActorSystem, router: Router) {
   }
 
   def gossip(): Unit = {
-    println("stabli run gossip")
+    println("stabi run gossip")
+    if(convergence) 
+
+  }
+
+  def convergence: Boolean = {
+    false
+  }
+
+  private def gossipToRandomNodeOf(addresses: IndexedSeq[Address]): Option[Address] = {
+
   }
 
 }
