@@ -19,14 +19,10 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" % "akka-actor" % "2.0.3" % "compile",
   "com.typesafe.akka" % "akka-remote" % "2.0.3" % "compile",  
   "com.typesafe.akka" % "akka-slf4j" % "2.0.3" % "compile",  
-  "org.apache.thrift" % "libthrift" % "0.5.0" % "compile",
-  "com.twitter" % "ostrich" % "4.0.1" % "compile",
-  "ch.qos.logback" % "logback-core" % "1.0.1" % "compile",    
-  "ch.qos.logback" % "logback-classic" % "1.0.1" % "runtime",
-  "com.typesafe.akka" % "akka-testkit" % "2.0.2" % "test",
-  "org.specs2" %% "specs2" % "1.11" % "test",
-  "junit" % "junit" % "4.8.1" % "test",
-  "org.scalatest" %% "scalatest" % "1.8" % "test"
+  "org.apache.thrift" % "libthrift" % "0.9.0" % "compile",
+  "com.twitter" % "util-eval"   % "5.3.13",
+  "ch.qos.logback" % "logback-core" % "1.0.7" % "compile",    
+  "ch.qos.logback" % "logback-classic" % "1.0.7" % "runtime"
 )
 
 fork in run := true

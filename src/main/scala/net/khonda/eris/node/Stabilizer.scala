@@ -98,17 +98,17 @@ class Stabilizer(system: ActorSystem, router: Router) {
 
   def gossip(): Unit = {
     println("stabi run gossip")
-    if(convergence) 
+    // if(convergence) 
 
   }
 
   def convergence: Boolean = {
     false
   }
-
+/*
   private def gossipToRandomNodeOf(addresses: IndexedSeq[Address]): Option[Address] = {
 
   }
-
+*/
 }
 
