@@ -35,9 +35,13 @@ case class Route(id: String,
 		 dbport: Int,
 		 score: Int) extends NodeMessage
 
-case class RoutingTable(version: Long,
-			table: List[Route],
-			unreachable: Set[Route]) extends NodeMessage
+case class RoutingTable(version: Long = 0L,
+			table: List[Route] = List.empty,
+			unreachable: Set[Route] = Set.empty) extends NodeMessage {
+
+  def addresses: IndexedSeq[Address] = (table map (n => AddressFromURIString(n.uri))).toIndexedSeq
+
+}
 
 
 class Node(config: ErisConfig) {
@@ -127,7 +131,7 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
   case class State(rt: RoutingTable)
 
   val state = {
-    val latest = RoutingTable(0L, List.empty, Set.empty)
+    val latest = RoutingTable()
     new AtomicReference[State](State(latest))
   }
 
