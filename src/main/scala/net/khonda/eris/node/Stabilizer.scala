@@ -15,25 +15,35 @@ import ch.qos.logback._
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import scala.concurrent.forkjoin.ThreadLocalRandom
+import scala.collection.immutable.Map
 import net.khonda.eris.config.{Eris => ErisConfig}
 
 
 //INTERNL API
 case class Join(from: Route) extends NodeMessage
 case class Heartbeat(from: Address) extends NodeMessage
-case class Send(to: Address) extends NodeMessage
+case class Send(to: Address, envelope: GossipEnvelope) extends NodeMessage
 case class Accept(rt: RoutingTable) extends NodeMessage
-case class GossipEnvelope(from: Address, gossip: Gossip) extends NodeMessage
-case class GossipOverview(seen: Map[Address, Boolean] = Map.empty)
+case class GossipEnvelope(from: Address, gossip: Gossip, conversation: Boolean = true) extends NodeMessage
+
+case class GossipOverview(seen: Map[Address, Boolean] = Map.empty) 
 
 case class Gossip(
   overview: GossipOverview = GossipOverview(),
   rt: RoutingTable = RoutingTable()) {
-
+  
   def seen(address: Address): Gossip = {
     if (overview.seen.contains(address)) this
     else this copy (overview = overview copy (seen = overview.seen + (address -> true)))
   }
+    
+  def convergence: Boolean = {    
+    val members = rt.addresses
+    val seen = overview.seen
+    def allMembersInSeen = members.forall(m => seen.contains(m))
+    println(overview.seen)
+    allMembersInSeen
+  }    
 
 }
 
@@ -43,8 +53,7 @@ class Stabilizer(system: ActorSystem, router: Router) {
   val logger = LoggerFactory.getLogger(classOf[Stabilizer])
   val selfAddress = router.self
 
-  var latestGossip: Gossip = Gossip()
-  var latestOverview: GossipOverview = GossipOverview()
+  var latestGossip: Gossip = Gossip()  
 
   // Create the master
   val master = system.actorOf(Props(new Master).withDeploy(Deploy(scope = RemoteScope(router.self))), name = "stabilizer")
@@ -60,10 +69,10 @@ class Stabilizer(system: ActorSystem, router: Router) {
     }
          
     def receive = {
-      case Send(to: Address) => {
-	println("Send gossip to "+to)
-	val gossip = latestGossip	
-	context.actorFor(to+"/user/stabilizer") ! GossipEnvelope(selfAddress, gossip)	
+      case Send(to: Address, envelope: GossipEnvelope) => {
+	println("Send gossip to "+to+" as ")
+	
+	context.actorFor(to+"/user/stabilizer") ! envelope 
       }
 
       //listener
@@ -86,8 +95,12 @@ class Stabilizer(system: ActorSystem, router: Router) {
     val result = Await.result(future, timeout.duration)   
     result match {
       case Accept(rt) => {
-	logger.debug("join accepted update rt")
+	logger.debug("join accepted update rt and reset gossip info")
 	router.updateRoutingTable(rt)	
+	//reset overview seen
+	val latestOverview = latestGossip.overview 	
+	latestGossip = Gossip(latestOverview, router.currentTable) seen selfAddress
+	println(latestGossip)	
 	true
       }
       case _ => false
@@ -96,25 +109,45 @@ class Stabilizer(system: ActorSystem, router: Router) {
 
   def receiveGossip(envelope: GossipEnvelope): Unit = {
     val from = envelope.from
+    val callback = envelope.conversation
     val remoteGossip = envelope.gossip
     val localGossip = latestGossip
+
     println("receiveGossip "+from+" version"+remoteGossip.rt.version)
-    if(remoteGossip.rt.version > localGossip.rt.version) router.updateRoutingTable(remoteGossip.rt)
+    
+    val winningGossip = 
+      if (remoteGossip.rt.version < localGossip.rt.version) localGossip
+      else remoteGossip
+
+    latestGossip = winningGossip seen selfAddress
+
+    if (winningGossip == remoteGossip) {
+      router.updateRoutingTable(remoteGossip.rt)
+      if(callback) oneWayGossipTo(from) //callback at once
+    }
+
   }
 
   def gossip(): Unit = {
     println("scheduled gossiping called")
-    if(!convergence) {
-      val rt = router.currentTable
-      val overview = latestOverview
-      latestGossip = Gossip(overview, rt)
+    val localGossip = latestGossip
+    if(!localGossip.convergence) {      
       gossipToRandomNodeOf(router.currentTable.addresses)
     }
-  }
+  }  
 
-  def convergence: Boolean = {    
-    false
-  }
+  /**
+   * Gossips latest gossip to an address.
+   */
+  def gossipTo(address: Address): Unit =
+    gossipTo(address, GossipEnvelope(selfAddress, latestGossip, conversation = true))
+
+  def oneWayGossipTo(address: Address): Unit =
+    gossipTo(address, GossipEnvelope(selfAddress, latestGossip, conversation = false))
+
+  def gossipTo(address: Address, envelope: GossipEnvelope): Unit = 
+    if (address != selfAddress) master ! Send(address, envelope)
+
 
   private def selectRandomNode(addresses: IndexedSeq[Address]): Option[Address] =
     if (addresses.isEmpty) None
@@ -122,7 +155,7 @@ class Stabilizer(system: ActorSystem, router: Router) {
 
   private def gossipToRandomNodeOf(addresses: IndexedSeq[Address]): Unit = {
     val peer = selectRandomNode(addresses filterNot (_ == selfAddress))    
-    peer foreach { address => master ! Send(address) }
+    peer foreach { address => gossipTo(address) }
   }
 
 }
