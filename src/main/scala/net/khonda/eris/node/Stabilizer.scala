@@ -20,21 +20,10 @@ import net.khonda.eris.config.{Eris => ErisConfig}
 
 //INTERNL API
 case class Join(from: Route) extends NodeMessage
-
 case class Heartbeat(from: Address) extends NodeMessage
-
-//TODO REMOVE
-case object Stabilize extends NodeMessage
-
 case class Send(to: Address) extends NodeMessage
-
-
-case class Envelope(from: Route,  rt: RoutingTable) extends NodeMessage
-case class Response(b: Boolean, rt: RoutingTable) extends NodeMessage
 case class Accept(rt: RoutingTable) extends NodeMessage
-
 case class GossipEnvelope(from: Address, gossip: Gossip) extends NodeMessage
-
 case class GossipOverview(seen: Map[Address, Boolean] = Map.empty)
 
 case class Gossip(
@@ -76,16 +65,7 @@ class Stabilizer(system: ActorSystem, router: Router) {
 	val gossip = latestGossip	
 	context.actorFor(to+"/user/stabilizer") ! GossipEnvelope(selfAddress, gossip)	
       }
-      //TODO remove
-      case Stabilize => {
-	val self = router.getNode
- 	//check my successor is down
-	val defSucc = router.getSuccessor(self)
-	if(defSucc.node_state == Down) context.actorFor(defSucc.uri+"/user/stabilizer") ! Envelope(self, router.currentTable)
-	val succ = router.getSuccessor(self, (route: Route) => route.node_state != Down)	
-	context.actorFor(succ.uri+"/user/stabilizer") ! Envelope(self, router.currentTable)
-      }
-      
+
       //listener
       case Join(from) => {	
 	router.add(from)	
@@ -95,30 +75,6 @@ class Stabilizer(system: ActorSystem, router: Router) {
       case msg: GossipEnvelope => receiveGossip(msg)
 
       case Heartbeat(from) => router.receiveHeartbeat(from)
-
-      //TODO remove
-      case Envelope(from, rt) => {
-        log.debug("Envelope from "+ from)
-        //check i am your successor 	
-	val self = router.getNode	
-	val pre = router.getPredecessor(self, (route: Route) => route.node_state != Down)
-	if(from.id == pre.id){
-	  sender ! Response(true, router.currentTable)
-	}else{
-	  sender ! Response(false, router.currentTable)
-	}
-	router.updateRoutingTable(rt)
-      }      
-      //TODO remove
-      case Response(true, rt) => {        
-	//update rt
-	router.updateRoutingTable(rt)
-      }
-      //TODO remove
-      case Response(false, rt) => {
-	//update rt	
-	router.updateRoutingTable(rt)
-      }      
 
     }    
   }  
