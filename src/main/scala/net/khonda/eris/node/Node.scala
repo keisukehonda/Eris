@@ -67,10 +67,28 @@ class Node(config: ErisConfig) {
   val lookupProxy = new LookupProxy(system, router)
   val stabilizer = new Stabilizer(system, router)
 
-  //gossip tick
+  //gossip tick -> start after joining
   private lazy val gossipTask = FixedRateTask(system.scheduler, 0 milliseconds, 2000 milliseconds) {    
     gossipTick()
   }
+
+  //heartbeat start
+  private val heartbeatTask = FixedRateTask(system.scheduler, config.failuredetector_duration._1, config.failuredetector_duration._2) {
+    heartbeat()
+  }
+
+  //failureDetectorReaper start
+  private val failureDetectorReaperTask = FixedRateTask(system.scheduler,  2000 milliseconds, 4000 milliseconds) {
+    reapUnreachableNode()
+  }
+
+  //leaderAction start
+  private val leaderActionsTask = FixedRateTask(system.scheduler, 1000 milliseconds, 2000 milliseconds) {
+    leaderActions()
+  }
+    
+  system.registerOnTermination(shutdown())
+
 
   //join to cluster using lookup node and check i am newcomer or rejoin
   val (accept, isReJoin) = join(AddressFromURIString(config.getUri(config.lookup._1, config.lookup._2)))
@@ -109,8 +127,25 @@ class Node(config: ErisConfig) {
     }
   }
 
-  def gossipTick(): Unit = {    
+  private def gossipTick(): Unit = {    
     stabilizer.gossip()
+  }
+
+  private def heartbeat(): Unit = {
+  }
+
+  private def reapUnreachableNode(): Unit = {
+  }
+
+  private def leaderActions(): Unit = {
+  }
+
+  //Shutdown
+  def shutdown(): Unit = {    
+    logger.debug("shutdown Chord system")
+    heartbeatTask.cancel()
+    failureDetectorReaperTask.cancel()
+    leaderActionsTask.cancel()    
   }
   
 }
@@ -175,6 +210,18 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
       case _ => SHA1Hasher(hostname.reverse+"ak5KOul.4qEms") // more then just random
     }
   }
+
+  //Leader is head of routing table && not unreachable
+  def isLeader: Boolean = (getLeader.uri == getNode.uri)
+
+  def getLeader: Route = {
+    val localTable = currentTable.table
+    val localUnreachable = currentTable.unreachable
+    val upList = localTable filter (route => route.node_state == Up && !localUnreachable.exists(route.uri == _.uri))
+    if(upList.isEmpty) getNode else upList.head    
+  }
+  
+  def isSingletonCluster: Boolean = currentTable.table.size == 1
 
   def currentTable: RoutingTable = state.get.rt
 
