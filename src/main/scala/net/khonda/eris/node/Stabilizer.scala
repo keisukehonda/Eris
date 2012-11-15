@@ -70,8 +70,7 @@ class Stabilizer(system: ActorSystem, router: Router) {
          
     def receive = {
       case Send(to: Address, envelope: GossipEnvelope) => {
-	println("Send gossip to "+to+" as ")
-	
+	println("Send gossip to "+to+" as ")	
 	context.actorFor(to+"/user/stabilizer") ! envelope 
       }
 
@@ -109,7 +108,7 @@ class Stabilizer(system: ActorSystem, router: Router) {
 
   def receiveGossip(envelope: GossipEnvelope): Unit = {
     val from = envelope.from
-    val callback = envelope.conversation
+    val conversation = envelope.conversation
     val remoteGossip = envelope.gossip
     val localGossip = latestGossip
 
@@ -123,7 +122,7 @@ class Stabilizer(system: ActorSystem, router: Router) {
 
     if (winningGossip == remoteGossip) {
       router.updateRoutingTable(remoteGossip.rt)
-      if(callback) oneWayGossipTo(from) //callback at once
+      if(conversation) oneWayGossipTo(from) //callback at once
     }
 
   }
