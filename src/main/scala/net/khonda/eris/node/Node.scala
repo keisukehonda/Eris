@@ -63,7 +63,7 @@ class Node(config: ErisConfig) {
 			       config.failuredetector_firstHeartbeatEstimate, 
 			       AccrualFailureDetector.realClock)
   val router = Router(system, config, failureDetector)
-  // private val selfHeartbeat = Heartbeat(router.self)  
+  private val selfHeartbeat = Heartbeat(router.self)  
   val lookupProxy = new LookupProxy(system, router)
   val stabilizer = new Stabilizer(system, router)
 
@@ -132,9 +132,26 @@ class Node(config: ErisConfig) {
   }
 
   private def heartbeat(): Unit = {
+    val localTable = router.currentTable.table
+    val beatTo = localTable.toSeq.map(_.uri). map(AddressFromURIString(_))
+    for (address <- beatTo; if address != router.self) {	
+      system.actorFor(address+"/user/stabilizer") ! selfHeartbeat      
+    }    
   }
 
   private def reapUnreachableNode(): Unit = {
+    if(!router.isSingletonCluster){
+      val localTable = router.currentTable.table
+      val localUreachable = router.currentTable.unreachable
+      val newlyDetectedUnreachableNodes = localTable filterNot { node => failureDetector.isAvailable(AddressFromURIString(node.uri)) }
+      
+      if(newlyDetectedUnreachableNodes.nonEmpty){
+	logger.debug("Unreachable "+newlyDetectedUnreachableNodes)
+	val newUnreachableNodes = localUreachable ++ newlyDetectedUnreachableNodes	
+	//update RoutingTable
+	router.updateRoutingTable(RoutingTable(System.currentTimeMillis(), localTable, newUnreachableNodes))
+      }
+    }
   }
 
   private def leaderActions(): Unit = {
