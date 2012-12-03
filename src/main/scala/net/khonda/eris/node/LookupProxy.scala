@@ -1,9 +1,7 @@
 package net.khonda.eris.node
 
 import akka.actor._
-import akka.dispatch.Future
-import akka.dispatch.Await
-import akka.util.duration._
+
 import akka.util.Timeout
 import akka.pattern.ask
 import akka.remote.RemoteScope
@@ -11,6 +9,8 @@ import com.typesafe.config.ConfigFactory
 import ch.qos.logback._
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import scala.concurrent.{Future, Await}
+import scala.concurrent.duration._
 import java.lang.Thread._
 
 case class Lookup(uri: String) extends NodeMessage

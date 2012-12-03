@@ -2,7 +2,7 @@ name := "Eris"
 
 version := "0.9"
 
-scalaVersion :="2.9.2"
+scalaVersion :="2.10.0-RC3"
 
 retrieveManaged := true
 
@@ -15,12 +15,11 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scala-lang" % "scala-compiler" % "2.9.2" % "compile",
-  "com.typesafe.akka" % "akka-actor" % "2.0.3" % "compile",
-  "com.typesafe.akka" % "akka-remote" % "2.0.3" % "compile",  
-  "com.typesafe.akka" % "akka-slf4j" % "2.0.3" % "compile",  
+  "com.typesafe.akka" %% "akka-actor" % "2.1.0-RC3" cross CrossVersion.full,
+  "com.typesafe.akka" %% "akka-remote" % "2.1.0-RC3" cross CrossVersion.full,
+  "com.typesafe.akka" %% "akka-slf4j" % "2.1.0-RC3" cross CrossVersion.full,
   "org.apache.thrift" % "libthrift" % "0.9.0" % "compile",
-  "com.twitter" % "util-eval"   % "5.3.13",
+  "com.twitter" % "util-eval" % "5.3.13",
   "ch.qos.logback" % "logback-core" % "1.0.7" % "compile",    
   "ch.qos.logback" % "logback-classic" % "1.0.7" % "runtime"
 )

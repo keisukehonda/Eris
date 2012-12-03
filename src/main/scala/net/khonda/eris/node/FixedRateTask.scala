@@ -4,18 +4,19 @@
 
 package net.khonda.eris.node
 
+import akka.actor.Scheduler
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.ExecutionContext.Implicits.global
 
-import akka.actor.Scheduler
-import akka.util.Duration
 
 /**
  * INTERNAL API
  */
 private object FixedRateTask {
-  def apply(scheduler: Scheduler, initalDelay: Duration, delay: Duration)(f: ⇒ Unit): FixedRateTask = {
+  def apply(scheduler: Scheduler, initalDelay: FiniteDuration, delay: FiniteDuration)(f: ⇒ Unit): FixedRateTask = {
     new FixedRateTask(scheduler, initalDelay, delay, new Runnable { def run(): Unit = f })
   }
 }
@@ -27,7 +28,7 @@ private object FixedRateTask {
  * for inaccuracy in scheduler. It will start when constructed, using the
  * initialDelay.
  */
-private class FixedRateTask(scheduler: Scheduler, initalDelay: Duration, delay: Duration, task: Runnable) extends Runnable {
+private class FixedRateTask(scheduler: Scheduler, initalDelay: FiniteDuration, delay: FiniteDuration, task: Runnable) extends Runnable {
 
   private val delayNanos = delay.toNanos
   private val cancelled = if(delayNanos < 0) new AtomicBoolean(true) else new AtomicBoolean(false)
@@ -42,7 +43,7 @@ private class FixedRateTask(scheduler: Scheduler, initalDelay: Duration, delay: 
   } finally if (!cancelled.get) {
     val nextTime = startTime + delayNanos * counter.incrementAndGet
     // it's ok to schedule with negative duration, will run asap
-    val nextDelay = Duration(nextTime - System.nanoTime, TimeUnit.NANOSECONDS)
+    val nextDelay = FiniteDuration(nextTime - System.nanoTime, TimeUnit.NANOSECONDS)
     try {
       scheduler.scheduleOnce(nextDelay, this)
     } catch { case e: IllegalStateException ⇒ /* will happen when scheduler is closed, nothing wrong */ }

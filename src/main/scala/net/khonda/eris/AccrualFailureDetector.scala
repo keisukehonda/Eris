@@ -6,12 +6,11 @@ package net.khonda.eris
 import akka.actor.{ ActorSystem, Address, ExtendedActorSystem }
 import akka.remote.RemoteActorRefProvider
 import akka.event.Logging
-import scala.collection.immutable.Map
 import scala.annotation.tailrec
+import scala.collection.immutable.Map
+import scala.concurrent.duration._
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.TimeUnit.NANOSECONDS
-import akka.util.Duration
-import akka.util.duration._
 
 import net.khonda.eris.config.{Eris => ErisConfig}
 

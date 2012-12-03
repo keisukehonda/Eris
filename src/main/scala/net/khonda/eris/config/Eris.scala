@@ -1,6 +1,6 @@
 package net.khonda.eris.config
 
-import akka.util.Duration
+import scala.concurrent.duration.FiniteDuration
 
 trait Eris {
 
@@ -12,13 +12,13 @@ trait Eris {
   def autoJoin: Boolean
   def db: (String, Int)
 
-  def failuredetector_duration: (Duration, Duration)
+  def failuredetector_duration: (FiniteDuration, FiniteDuration)
   def failuredetector_threshold: Double
   def failuredetector_maxSampleSize: Int
-  def failuredetector_minStdDeviation: Duration
-  def failuredetector_acceptableHeartbeatPause: Duration
-  def failuredetector_firstHeartbeatEstimate: Duration
-  def stabi_seq: Duration
+  def failuredetector_minStdDeviation: FiniteDuration
+  def failuredetector_acceptableHeartbeatPause: FiniteDuration
+  def failuredetector_firstHeartbeatEstimate: FiniteDuration
+  def stabi_seq: FiniteDuration
 
   def getUri(hostname: String, port: Int): String = "akka://ChordSystem-"+port+"@"+hostname+":"+port
 

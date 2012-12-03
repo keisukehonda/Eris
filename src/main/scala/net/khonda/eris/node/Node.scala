@@ -4,13 +4,13 @@ import net.khonda.eris._
 import net.khonda.eris.config.{Eris => ErisConfig}
 import akka.actor._
 import akka.remote.RemoteScope
-import akka.util.duration._
 import com.typesafe.config.ConfigFactory
 import ch.qos.logback._
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicReference
 import scala.annotation.tailrec
+import scala.concurrent.duration._
 import scala.xml.XML
 
 
@@ -68,7 +68,7 @@ class Node(config: ErisConfig) {
   val stabilizer = new Stabilizer(system, router)
 
   //gossip tick -> start after joining
-  private lazy val gossipTask = FixedRateTask(system.scheduler, 0 milliseconds, 2000 milliseconds) {    
+  private lazy val gossipTask = FixedRateTask(system.scheduler, 0 millis, 2000 millis) {    
     gossipTick()
   }
 
@@ -78,12 +78,12 @@ class Node(config: ErisConfig) {
   }
 
   //failureDetectorReaper start
-  private val failureDetectorReaperTask = FixedRateTask(system.scheduler,  2000 milliseconds, 4000 milliseconds) {
+  private val failureDetectorReaperTask = FixedRateTask(system.scheduler,  2000 millis, 4000 millis) {
     reapUnreachableNode()
   }
 
   //leaderAction start
-  private val leaderActionsTask = FixedRateTask(system.scheduler, 1000 milliseconds, 2000 milliseconds) {
+  private val leaderActionsTask = FixedRateTask(system.scheduler, 1000 millis, 2000 millis) {
     leaderActions()
   }
     
