@@ -18,6 +18,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.1.0-RC3" cross CrossVersion.full,
   "com.typesafe.akka" %% "akka-remote" % "2.1.0-RC3" cross CrossVersion.full,
   "com.typesafe.akka" %% "akka-slf4j" % "2.1.0-RC3" cross CrossVersion.full,
+  "com.typesafe" % "slick_2.10.0-RC3" % "0.11.2",
   "org.apache.thrift" % "libthrift" % "0.9.0" % "compile",
   "com.twitter" % "util-eval" % "5.3.13",
   "ch.qos.logback" % "logback-core" % "1.0.7" % "compile",    
