@@ -11,7 +11,13 @@ object Main extends {
   
   def main(args: Array[String]) {
 
-    config  = Eval[ErisConfig](new File(args(0)))
+    //config  = Eval[ErisConfig](new File(args(0)))    
+    config = args(0) match {
+      case "config/app1.scala" => net.khonda.eris.config.app1
+      case "config/app2.scala" => net.khonda.eris.config.app2
+      case _                   => net.khonda.eris.config.app1
+    }
+    
 
     //akka system start
     val node = new Node(config)

@@ -1,7 +1,7 @@
 import net.khonda.eris.config._
 import com.twitter.conversions.time._
 import com.twitter.conversions.storage._
-import akka.util.Duration
+import scala.concurrent.duration._
 
 new Eris {
   //edit
