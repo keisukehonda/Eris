@@ -44,12 +44,11 @@ case class RoutingTable(version: Long = 0L,
 }
 
 
-class Node(config: ErisConfig) {
+class Node(config: ErisConfig) extends Peer{
   import Status._
 
-  val logger = LoggerFactory.getLogger(classOf[Node])  
-  val startTime =  java.util.Calendar.getInstance(new java.util.Locale("ja", "JP", "JP")) //TODO
-  val akkaConfig = ConfigFactory.load()
+  val logger = LoggerFactory.getLogger(classOf[Node])
+  //akka system start
   val port = ConfigFactory.load().getConfig(config.app_no).getInt("akka.remote.netty.port")
   val system = ActorSystem("ChordSystem-"+port,
 			   ConfigFactory.load().getConfig(config.app_no).withFallback(akkaConfig))
@@ -63,7 +62,7 @@ class Node(config: ErisConfig) {
 			       config.failuredetector_firstHeartbeatEstimate, 
 			       AccrualFailureDetector.realClock)
   val router = Router(system, config, failureDetector)
-  private val selfHeartbeat = Heartbeat(router.self)  
+  private val selfHeartbeat = Heartbeat(router.self)
   val lookupProxy = new LookupProxy(system, router)
   val stabilizer = new Stabilizer(system, router)
 
@@ -105,21 +104,21 @@ class Node(config: ErisConfig) {
 	val isReJoin = localTable.find(_.uri == router.self.toString) match {
 	  case Some(self_in_rt) => {
 	    //check id value rt and status.xml
-	    if(self_in_rt.id != router.nodeid) { router.nodeid = self_in_rt.id }
+	    if (self_in_rt.id != router.nodeid) { router.nodeid = self_in_rt.id }
 	    true
 	  }
 	  case None => {	    
-	    if(router.nodeid != "") true else {
+	    if (router.nodeid != "") true else {
 	      router.nodeid = router.calcHostId(router.self.toString)	      
 	      false
 	    }	    
 	  }
 	}
 	//validation nodeid
-	if(router.nodeid.matches("""^[a-z0-9]{40}$""")) {
+	if (router.nodeid.matches("""^[a-z0-9]{40}$""")) {
 	  //join and stabilizer start	
 	  logger.info("join as:"+router.nodeid)
-	  if(stabilizer.join(router.getSuccessor)) gossipTask
+	  if (stabilizer.join(router.getSuccessor)) gossipTask
 	  (true, isReJoin)
 	} else { logger.info("id is not valid:"+router.nodeid); (false, false) }	
       }
@@ -134,18 +133,17 @@ class Node(config: ErisConfig) {
   private def heartbeat(): Unit = {
     val localTable = router.currentTable.table
     val beatTo = localTable.toSeq.map(_.uri). map(AddressFromURIString(_))
-    for (address <- beatTo; if address != router.self) {	
-      system.actorFor(address+"/user/stabilizer") ! selfHeartbeat      
-    }    
+    for (address <- beatTo; if address != router.self) 
+      system.actorFor(address+"/user/stabilizer") ! selfHeartbeat
   }
 
   private def reapUnreachableNode(): Unit = {
-    if(!router.isSingletonCluster){
+    if (!router.isSingletonCluster) {
       val localTable = router.currentTable.table
       val localUreachable = router.currentTable.unreachable
       val newlyDetectedUnreachableNodes = localTable filterNot { node => failureDetector.isAvailable(AddressFromURIString(node.uri)) }
       
-      if(newlyDetectedUnreachableNodes.nonEmpty){
+      if (newlyDetectedUnreachableNodes.nonEmpty) {
 	logger.debug("Unreachable "+newlyDetectedUnreachableNodes)
 	val newUnreachableNodes = localUreachable ++ newlyDetectedUnreachableNodes	
 	//update RoutingTable
@@ -193,7 +191,7 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
     AddressFromURIString(local)
   }
 
-  var nodeid = if(config.autoJoin) {
+  var nodeid = if (config.autoJoin) {
     try {
       val filename ="node_status_"+config.app_no+".xml"
       val status = XML.loadFile("logs/"+filename)
@@ -219,7 +217,7 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
     val starters = List("1","9","5","d","3","b","6","e","2","a","4","c","8","7")
     
     localTable.size match {
-      case n if(n < starters.length) => {
+      case n if (n < starters.length) => {
 	val upper =  new StringWriter(){{ for(i <- 1 to 20) write(starters(n)) }}.toString()	
 	val lower = SHA1Hasher.half(hostname.reverse+"ak5KOul.4qEms")
 	upper+lower	
@@ -235,7 +233,7 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
     val localTable = currentTable.table
     val localUnreachable = currentTable.unreachable
     val upList = localTable filter (route => route.node_state == Up && !localUnreachable.exists(route.uri == _.uri))
-    if(upList.isEmpty) getNode else upList.head    
+    if (upList.isEmpty) getNode else upList.head    
   }
   
   def isSingletonCluster: Boolean = currentTable.table.size == 1
@@ -247,28 +245,28 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
     val localState = state.get
     val localTable = localState.rt
     //check version   
-    val winningTable = if(localTable.version == newTable.version) {
+    val winningTable = if (localTable.version == newTable.version) {
 	localTable
-      }else if(localTable.version > newTable.version) {
+      } else if (localTable.version > newTable.version) {
 	localTable
-      }else {
+      } else {
 	newTable
       }      
     val newState = localState copy (rt = winningTable)
-    if(!state.compareAndSet(localState, newState)) updateRoutingTable(newTable) //recur if we fail the update
+    if (!state.compareAndSet(localState, newState)) updateRoutingTable(newTable) //recur if we fail the update
   }
 
   final def add(newone: Route): Unit = {    
     val localState = state.get
     val localTable = localState.rt.table
     
-    if(!localTable.exists(_.uri == newone.uri)) { //newcomer
+    if (!localTable.exists(_.uri == newone.uri)) { //newcomer
       //add newone as predessor
       val newList = localTable :+ newone
       val sortedList = newList.sortWith((r1, r2) => SHA1Hasher.compareWith(r1.id, r2.id))
       logger.debug("add "+sortedList)
       updateRoutingTable(currentTable copy (version = System.currentTimeMillis(), table = sortedList))
-    }else {
+    } else {
       changeState(AddressFromURIString(newone.uri), Joining) //list aleady contains newone => join again      
     }
     //add heartbeat list    
@@ -280,7 +278,7 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
     val localUnreachable = currentTable.unreachable
 
     val newTable = localTable map {
-      route => if(route.uri == address.toString) {
+      route => if (route.uri == address.toString) {
 	route copy (node_state = newState)
       } else route
     }
@@ -293,7 +291,7 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
 
   def getNode: Route = {
     val localTable = currentTable.table
-    if(localTable.isEmpty) node
+    if (localTable.isEmpty) node
     else {
       localTable.find(route => route.uri == self.toString) match {
 	case Some(route) => route
@@ -315,10 +313,10 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
 
   def getSuccessor(target: Route, condition: Route => Boolean): Route = {
     val localTable = currentTable.table
-    if(localTable.isEmpty) target else {
+    if (localTable.isEmpty) target else {
       //split
       val splits = localTable.splitAt(localTable.indexWhere(route => route.uri == target.uri) + 1)
-      if(splits._2.isEmpty) {
+      if (splits._2.isEmpty) {
 	//localTable.head 
 	localTable.find(route => condition(route)) match {
 	  case Some(route) => route
@@ -353,7 +351,7 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
     if(localTable.isEmpty) target else {
       //split
       val splits = localTable.splitAt(localTable.indexWhere(route => route.uri == target.uri))
-      if(splits._1.isEmpty) {		
+      if (splits._1.isEmpty) {		
 	splits._2.reverse.find(route => condition(route)) match {
 	  case Some(route) => route
 	  case None => target

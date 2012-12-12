@@ -5,8 +5,9 @@ import scala.concurrent.duration._
 
 new Eris {
   //edit
-  val mode = "node"
+  val db_mode = false
   val app_no = "app_3"
+  val db_no = "db_3"
   val hostname = "127.0.0.1"
   val port = 7939
   val lookup = ("127.0.0.1", 2519)

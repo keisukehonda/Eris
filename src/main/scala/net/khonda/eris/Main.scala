@@ -2,6 +2,7 @@ package net.khonda.eris
 
 import net.khonda.eris.config.{Eris => ErisConfig}
 import net.khonda.eris.node._
+import net.khonda.eris.db._
 import com.twitter.util.Eval
 import java.io.File
 
@@ -15,14 +16,15 @@ object Main extends {
     config = args(0) match {
       case "config/app1.scala" => net.khonda.eris.config.app1
       case "config/app2.scala" => net.khonda.eris.config.app2
+      case "config/app3.scala" => net.khonda.eris.config.app3
+      case "config/app4.scala" => net.khonda.eris.config.app4      
       case _                   => net.khonda.eris.config.app1
     }
     
-
     //akka system start
-    val node = new Node(config)
+    val node = if (config.db_mode) new Db(config) else new Node(config)
     
-    println("Eris Running as "+config.mode+" mode")
+    println("Eris Running as "+ (if (config.db_mode) "db" else "node") +" mode")
 
   }
 

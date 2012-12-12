@@ -26,7 +26,7 @@ case class Send(to: Address, envelope: GossipEnvelope) extends NodeMessage
 case class Accept(rt: RoutingTable) extends NodeMessage
 case class GossipEnvelope(from: Address, gossip: Gossip, conversation: Boolean = true) extends NodeMessage
 
-case class GossipOverview(seen: Map[Address, Boolean] = Map.empty) 
+case class GossipOverview(seen: Map[Address, Boolean] = Map.empty)
 
 case class Gossip(
   overview: GossipOverview = GossipOverview(),
@@ -47,7 +47,7 @@ case class Gossip(
 
 }
 
-//Stabilize network usign Gossip protocol
+//Stabilize network using Gossip protocol
 class Stabilizer(system: ActorSystem, router: Router) {
   
   val logger = LoggerFactory.getLogger(classOf[Stabilizer])
@@ -57,7 +57,7 @@ class Stabilizer(system: ActorSystem, router: Router) {
 
   // Create the master
   val master = system.actorOf(Props(new Master).withDeploy(Deploy(scope = RemoteScope(router.self))), name = "stabilizer")
-  logger.info("Stabiliser start")  
+  logger.info("Node stabiliser start")
   
   class Master extends Actor {
     import Status._
@@ -130,7 +130,7 @@ class Stabilizer(system: ActorSystem, router: Router) {
   def gossip(): Unit = {
     println("scheduled gossiping called")
     val localGossip = latestGossip
-    if(!localGossip.convergence) {      
+    if (!localGossip.convergence) {      
       gossipToRandomNodeOf(router.currentTable.addresses)
     }
   }  
