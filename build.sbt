@@ -15,9 +15,9 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.1.0-RC4" cross CrossVersion.full,
-  "com.typesafe.akka" %% "akka-remote" % "2.1.0-RC4" cross CrossVersion.full,
-  "com.typesafe.akka" %% "akka-slf4j" % "2.1.0-RC4" cross CrossVersion.full,
+  "com.typesafe.akka" %% "akka-actor" % "2.1.0-RC5" cross CrossVersion.full,
+  "com.typesafe.akka" %% "akka-remote" % "2.1.0-RC5" cross CrossVersion.full,
+  "com.typesafe.akka" %% "akka-slf4j" % "2.1.0-RC5" cross CrossVersion.full,
   "com.typesafe" % "slick_2.10.0-RC3" % "0.11.2",
   "org.apache.thrift" % "libthrift" % "0.9.0" % "compile",
   "com.twitter" % "util-eval" % "6.0.1",
