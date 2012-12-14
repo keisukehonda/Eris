@@ -20,5 +20,11 @@ class Db(config: ErisConfig) extends Peer {
   val self: Address = AddressFromURIString(config.getUri(config.hostname, port))
 
   val stabilizer = new Stabilizer(system, self)
+  
+  //heartbeat start
+  private val heartbeatTask = FixedRateTask(system.scheduler, config.failuredetector_duration._1, config.failuredetector_duration._2) {
+    stabilizer.heartbeat()
+  }
+  
 
 }

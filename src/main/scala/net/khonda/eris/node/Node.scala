@@ -13,9 +13,6 @@ import scala.annotation.tailrec
 import scala.concurrent.duration._
 import scala.xml.XML
 
-
-trait NodeMessage extends Serializable
-
 sealed trait Status extends NodeMessage
 object Status {
   case object Joining extends Status  
@@ -126,11 +123,10 @@ class Node(config: ErisConfig) extends Peer{
     }
   }
 
-  private def gossipTick(): Unit = {    
-    stabilizer.gossip()
-  }
+  private def gossipTick(): Unit = stabilizer.gossip()
+  
 
-  private def heartbeat(): Unit = {
+  private def heartbeat(): Unit = {    
     val localTable = router.currentTable.table
     val beatTo = localTable.toSeq.map(_.uri). map(AddressFromURIString(_))
     for (address <- beatTo; if address != router.self) 
@@ -189,6 +185,12 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
     val port = ConfigFactory.load().getConfig(config.app_no).getInt("akka.remote.netty.port")
     val local = config.getUri(config.hostname, port)
     AddressFromURIString(local)
+  }
+
+  lazy val mydb: Address = {
+    val port = ConfigFactory.load().getConfig(config.db_no).getInt("akka.remote.netty.port")
+    val db = config.getUri(config.db._1, port)
+    AddressFromURIString(db)
   }
 
   var nodeid = if (config.autoJoin) {

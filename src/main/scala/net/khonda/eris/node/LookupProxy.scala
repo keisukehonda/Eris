@@ -7,6 +7,7 @@ import akka.pattern.ask
 import akka.remote.RemoteScope
 import com.typesafe.config.ConfigFactory
 import ch.qos.logback._
+import net.khonda.eris._
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import scala.concurrent.{Future, Await}

@@ -1,14 +1,13 @@
 package net.khonda.eris.node
 
-
 import akka.actor._
-
 import akka.util.Timeout
 import akka.pattern.ask
 import akka.remote.RemoteScope
 import akka.event.Logging
 import com.typesafe.config.ConfigFactory
 import ch.qos.logback._
+import net.khonda.eris._
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import scala.concurrent.{Future, Await}
@@ -17,35 +16,6 @@ import scala.concurrent.forkjoin.ThreadLocalRandom
 import scala.collection.immutable.Map
 
 import net.khonda.eris.config.{Eris => ErisConfig}
-
-
-//INTERNL API
-case class Join(from: Route) extends NodeMessage
-case class Heartbeat(from: Address) extends NodeMessage
-case class Send(to: Address, envelope: GossipEnvelope) extends NodeMessage
-case class Accept(rt: RoutingTable) extends NodeMessage
-case class GossipEnvelope(from: Address, gossip: Gossip, conversation: Boolean = true) extends NodeMessage
-
-case class GossipOverview(seen: Map[Address, Boolean] = Map.empty)
-
-case class Gossip(
-  overview: GossipOverview = GossipOverview(),
-  rt: RoutingTable = RoutingTable()) {
-  
-  def seen(address: Address): Gossip = {
-    if (overview.seen.contains(address)) this
-    else this copy (overview = overview copy (seen = overview.seen + (address -> true)))
-  }
-    
-  def convergence: Boolean = {    
-    val members = rt.addresses
-    val seen = overview.seen
-    def allMembersInSeen = members.forall(m => seen.contains(m))
-    println(overview.seen)
-    allMembersInSeen
-  }    
-
-}
 
 //Stabilize network using Gossip protocol
 class Stabilizer(system: ActorSystem, router: Router) {
@@ -132,6 +102,8 @@ class Stabilizer(system: ActorSystem, router: Router) {
     val localGossip = latestGossip
     if (!localGossip.convergence) {      
       gossipToRandomNodeOf(router.currentTable.addresses)
+      //gossip to my db
+      gossipTo(router.mydb)
     }
   }  
 
@@ -146,8 +118,7 @@ class Stabilizer(system: ActorSystem, router: Router) {
 
   def gossipTo(address: Address, envelope: GossipEnvelope): Unit = 
     if (address != selfAddress) master ! Send(address, envelope)
-
-
+  
   private def selectRandomNode(addresses: IndexedSeq[Address]): Option[Address] =
     if (addresses.isEmpty) None
     else Some(addresses(ThreadLocalRandom.current nextInt addresses.size))
@@ -156,6 +127,7 @@ class Stabilizer(system: ActorSystem, router: Router) {
     val peer = selectRandomNode(addresses filterNot (_ == selfAddress))    
     peer foreach { address => gossipTo(address) }
   }
+  
 
 }
 
