@@ -1,17 +1,16 @@
 /**
  * Copyright (C) 2009-2012 Typesafe Inc. <http://www.typesafe.com>
  */
+
 package net.khonda.eris
 
 import akka.actor.{ ActorSystem, Address, ExtendedActorSystem }
-import akka.remote.RemoteActorRefProvider
 import akka.event.Logging
+import scala.collection.immutable
 import scala.annotation.tailrec
-import scala.collection.immutable.Map
-import scala.concurrent.duration._
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.TimeUnit.NANOSECONDS
-
+import scala.concurrent.duration._
 import net.khonda.eris.config.{Eris => ErisConfig}
 
 object AccrualFailureDetector {
@@ -74,20 +73,20 @@ class AccrualFailureDetector(
 
   /**
    * Constructor that picks configuration from the settings.
-   */ 
-    /*
+   */
+  /*
   def this(
     system: ActorSystem,
-    settings: BriseisConfig) =
+    settings: ClusterSettings) =
     this(
       system,
-      settings.FailureDetectorThreshold,
-      settings.FailureDetectorMaxSampleSize,
-      settings.FailureDetectorAcceptableHeartbeatPause,
-      settings.FailureDetectorMinStdDeviation,
-      settings.HeartbeatInterval,
-      AccrualFailureDetector.realClock)
-*/
+      threshold = settings.FailureDetectorThreshold,
+      maxSampleSize = settings.FailureDetectorMaxSampleSize,
+      minStdDeviation = settings.FailureDetectorMinStdDeviation,
+      acceptableHeartbeatPause = settings.FailureDetectorAcceptableHeartbeatPause,
+      firstHeartbeatEstimate = settings.HeartbeatInterval,
+      clock = AccrualFailureDetector.realClock)
+  */
 
   private val log = Logging(system, "FailureDetector")
 
@@ -109,8 +108,7 @@ class AccrualFailureDetector(
   private case class State(
     version: Long = 0L,
     history: Map[Address, HeartbeatHistory] = Map.empty,
-    timestamps: Map[Address, Long] = Map.empty[Address, Long],
-    explicitRemovals: Set[Address] = Set.empty[Address])
+    timestamps: Map[Address, Long] = Map.empty[Address, Long])
 
   private val state = new AtomicReference[State](State())
 
@@ -125,7 +123,7 @@ class AccrualFailureDetector(
    */
   @tailrec
   final def heartbeat(connection: Address) {
-    //log.debug("Heartbeat from connection [{}] ", connection)
+    log.debug("Heartbeat from connection [{}] ", connection)
 
     val timestamp = clock()
     val oldState = state.get
@@ -143,8 +141,7 @@ class AccrualFailureDetector(
 
     val newState = oldState copy (version = oldState.version + 1,
       history = oldState.history + (connection -> newHistory),
-      timestamps = oldState.timestamps + (connection -> timestamp), // record new timestamp,
-      explicitRemovals = oldState.explicitRemovals - connection)
+      timestamps = oldState.timestamps + (connection -> timestamp)) // record new timestamp
 
     // if we won the race then update else try again
     if (!state.compareAndSet(oldState, newState)) heartbeat(connection) // recur
@@ -160,9 +157,7 @@ class AccrualFailureDetector(
     val oldState = state.get
     val oldTimestamp = oldState.timestamps.get(connection)
 
-    // if connection has been removed explicitly
-    if (oldState.explicitRemovals.contains(connection)) Double.MaxValue
-    else if (oldTimestamp.isEmpty) 0.0 // treat unmanaged connections, e.g. with zero heartbeats, as healthy connections
+    if (oldTimestamp.isEmpty) 0.0 // treat unmanaged connections, e.g. with zero heartbeats, as healthy connections
     else {
       val timeDiff = clock() - oldTimestamp.get
 
@@ -173,8 +168,9 @@ class AccrualFailureDetector(
       val φ = phi(timeDiff, mean + acceptableHeartbeatPauseMillis, stdDeviation)
 
       // FIXME change to debug log level, when failure detector is stable
-      if (φ > 1.0) log.info("Phi value [{}] for connection [{}], after [{} ms], based on  [{}]",
-        φ, connection, timeDiff, "N(" + mean + ", " + stdDeviation + ")")
+      if (φ > 1.0 && timeDiff < (acceptableHeartbeatPauseMillis + 5000))
+        log.info("Phi value [{}] for connection [{}], after [{} ms], based on  [{}]",
+          φ, connection, timeDiff, "N(" + mean + ", " + stdDeviation + ")")
 
       φ
     }
@@ -210,12 +206,23 @@ class AccrualFailureDetector(
     if (oldState.history.contains(connection)) {
       val newState = oldState copy (version = oldState.version + 1,
         history = oldState.history - connection,
-        timestamps = oldState.timestamps - connection,
-        explicitRemovals = oldState.explicitRemovals + connection)
+        timestamps = oldState.timestamps - connection)
 
       // if we won the race then update else try again
       if (!state.compareAndSet(oldState, newState)) remove(connection) // recur
     }
+  }
+
+  def reset(): Unit = {
+    @tailrec
+    def doReset(): Unit = {
+      val oldState = state.get
+      val newState = oldState.copy(version = oldState.version + 1, history = Map.empty, timestamps = Map.empty)
+      // if we won the race then update else try again
+      if (!state.compareAndSet(oldState, newState)) doReset() // recur
+    }
+    log.debug("Resetting failure detector")
+    doReset()
   }
 }
 
@@ -229,7 +236,7 @@ private object HeartbeatHistory {
    */
   def apply(maxSampleSize: Int): HeartbeatHistory = HeartbeatHistory(
     maxSampleSize = maxSampleSize,
-    intervals = IndexedSeq.empty,
+    intervals = immutable.IndexedSeq.empty,
     intervalSum = 0L,
     squaredIntervalSum = 0L)
 
@@ -244,7 +251,7 @@ private object HeartbeatHistory {
  */
 private case class HeartbeatHistory private (
   maxSampleSize: Int,
-  intervals: IndexedSeq[Long],
+  intervals: immutable.IndexedSeq[Long],
   intervalSum: Long,
   squaredIntervalSum: Long) {
 
