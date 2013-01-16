@@ -2,7 +2,7 @@ name := "Eris"
 
 version := "0.9"
 
-scalaVersion :="2.10.0-RC5"
+scalaVersion :="2.10.0"
 
 retrieveManaged := true
 
@@ -15,9 +15,9 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.1.0-RC5" cross CrossVersion.full,
-  "com.typesafe.akka" %% "akka-remote" % "2.1.0-RC5" cross CrossVersion.full,
-  "com.typesafe.akka" %% "akka-slf4j" % "2.1.0-RC5" cross CrossVersion.full,
+  "com.typesafe.akka" %% "akka-actor" % "2.1.0",
+  "com.typesafe.akka" %% "akka-remote" % "2.1.0",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.1.0",
   "com.typesafe" % "slick_2.10.0-RC3" % "0.11.2",
   "postgresql" % "postgresql" % "9.1-901.jdbc4",
   "org.apache.thrift" % "libthrift" % "0.9.0" % "compile",
