@@ -13,6 +13,8 @@ new Eris {
   val lookup = ("127.0.0.1", 2519)
   val autoJoin = true
   val db = ("127.0.0.1", 7839)
+  val db_user = "postgres"
+  val db_pass = "khonda2565"
 
   val failuredetector_duration = (Duration(3000, "milliseconds"), Duration(4000, "milliseconds"))
   val failuredetector_threshold = 8.0

@@ -12,14 +12,7 @@ object Main extends {
   
   def main(args: Array[String]) {
 
-    //config  = Eval[ErisConfig](new File(args(0)))    
-    config = args(0) match {
-      case "config/app1.scala" => net.khonda.eris.config.app1
-      case "config/app2.scala" => net.khonda.eris.config.app2
-      case "config/app3.scala" => net.khonda.eris.config.app3
-      case "config/app4.scala" => net.khonda.eris.config.app4      
-      case _                   => net.khonda.eris.config.app1
-    }
+    config  = Eval[ErisConfig](new File(args(0)))
     
     //akka system start
     val node = if (config.db_mode) new Db(config) else new Node(config)

@@ -4,7 +4,7 @@ version := "0.9"
 
 scalaVersion :="2.10.0"
 
-retrieveManaged := true
+//retrieveManaged := true
 
 resolvers ++= Seq(
   "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
@@ -21,7 +21,7 @@ libraryDependencies ++= Seq(
   "com.typesafe" % "slick_2.10.0-RC3" % "0.11.2",
   "postgresql" % "postgresql" % "9.1-901.jdbc4",
   "org.apache.thrift" % "libthrift" % "0.9.0" % "compile",
-  "com.twitter" % "util-eval" % "6.0.1",
+  "com.twitter" % "util-eval_2.10" % "6.1.0",
   "ch.qos.logback" % "logback-core" % "1.0.7" % "compile",    
   "ch.qos.logback" % "logback-classic" % "1.0.7" % "runtime"
 )

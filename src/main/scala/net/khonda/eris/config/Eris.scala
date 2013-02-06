@@ -2,6 +2,7 @@ package net.khonda.eris.config
 
 import scala.concurrent.duration.FiniteDuration
 
+
 trait Eris {
 
   def db_mode: Boolean
@@ -12,6 +13,8 @@ trait Eris {
   def lookup: (String, Int)
   def autoJoin: Boolean
   def db: (String, Int) //thrift port
+  def db_user: String
+  def db_pass: String
 
   def failuredetector_duration: (FiniteDuration, FiniteDuration)
   def failuredetector_threshold: Double
@@ -40,6 +43,8 @@ object app1 extends Eris {
   val lookup = ("127.0.0.1", 2519)
   val autoJoin = true
   val db = ("127.0.0.1", 7819)
+  val db_user = "postgres"
+  val db_pass = "khonda2565"
 
   val failuredetector_duration = (Duration(3000, "milliseconds"), Duration(4000, "milliseconds"))
   val failuredetector_threshold = 8.0
@@ -65,6 +70,8 @@ object app4 extends Eris {
   val lookup = ("127.0.0.1", 2519)
   val autoJoin = true
   val db = ("127.0.0.1", 7819)
+  val db_user = "postgres"
+  val db_pass = "khonda2565"  
 
   val failuredetector_duration = (Duration(3000, "milliseconds"), Duration(4000, "milliseconds"))
   val failuredetector_threshold = 8.0
@@ -89,6 +96,8 @@ object app2 extends Eris {
   val lookup = ("127.0.0.1", 2519)
   val autoJoin = true
   val db = ("127.0.0.1", 7829)
+  val db_user = "postgres"
+  val db_pass = "khonda2565"
 
   val failuredetector_duration = (Duration(3000, "milliseconds"), Duration(4000, "milliseconds"))
   val failuredetector_threshold = 8.0
@@ -114,6 +123,8 @@ object app3 extends Eris {
   val lookup = ("127.0.0.1", 2519)
   val autoJoin = true
   val db = ("127.0.0.1", 7839)
+  val db_user = "postgres"
+  val db_pass = "khonda2565" 
 
   val failuredetector_duration = (Duration(3000, "milliseconds"), Duration(4000, "milliseconds"))
   val failuredetector_threshold = 8.0
