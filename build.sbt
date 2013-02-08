@@ -18,7 +18,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.1.0",
   "com.typesafe.akka" %% "akka-remote" % "2.1.0",
   "com.typesafe.akka" %% "akka-slf4j" % "2.1.0",
-  "com.typesafe" % "slick_2.10.0-RC3" % "0.11.2",
+  "com.typesafe.slick" %% "slick" % "1.0.0",
   "postgresql" % "postgresql" % "9.1-901.jdbc4",
   "org.apache.thrift" % "libthrift" % "0.9.0" % "compile",
   "com.twitter" % "util-eval_2.10" % "6.1.0",
