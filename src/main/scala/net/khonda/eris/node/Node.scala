@@ -46,7 +46,7 @@ class Node(config: ErisConfig) extends Peer{
 
   val logger = LoggerFactory.getLogger(classOf[Node])
   //akka system start
-  val port = ConfigFactory.load().getConfig(config.app_no).getInt("akka.remote.netty.port")
+  val port = ConfigFactory.load().getConfig(config.app_no).getInt("akka.remote.netty.tcp.port")
   val system = ActorSystem("ChordSystem-"+port,
 			   ConfigFactory.load().getConfig(config.app_no).withFallback(akkaConfig))
 
@@ -182,13 +182,13 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
   }
 
   lazy val self: Address = {
-    val port = ConfigFactory.load().getConfig(config.app_no).getInt("akka.remote.netty.port")
+    val port = ConfigFactory.load().getConfig(config.app_no).getInt("akka.remote.netty.tcp.port")
     val local = config.getUri(config.hostname, port)
     AddressFromURIString(local)
   }
 
   lazy val mydb: Address = {
-    val port = ConfigFactory.load().getConfig(config.db_no).getInt("akka.remote.netty.port")
+    val port = ConfigFactory.load().getConfig(config.db_no).getInt("akka.remote.netty.tcp.port")
     val db = config.getUri(config.db._1, port)
     AddressFromURIString(db)
   }

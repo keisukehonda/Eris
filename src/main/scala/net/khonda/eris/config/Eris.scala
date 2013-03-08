@@ -24,6 +24,6 @@ trait Eris {
   def failuredetector_firstHeartbeatEstimate: FiniteDuration
   def stabi_seq: FiniteDuration
 
-  def getUri(hostname: String, port: Int): String = "akka://ChordSystem-"+port+"@"+hostname+":"+port
+  def getUri(hostname: String, port: Int): String = "akka.tcp://ChordSystem-"+port+"@"+hostname+":"+port
 
 }
