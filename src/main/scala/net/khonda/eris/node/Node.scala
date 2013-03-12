@@ -40,6 +40,9 @@ case class RoutingTable(version: Long = 0L,
 
 }
 
+/**
+ * PUBLIC API for CRUD.
+ */
 
 class Node(config: ErisConfig) extends Peer{
   import Status._
@@ -62,6 +65,7 @@ class Node(config: ErisConfig) extends Peer{
   private val selfHeartbeat = Heartbeat(router.self)
   val lookupProxy = new LookupProxy(system, router)
   val stabilizer = new Stabilizer(system, router)
+  val core = new NodeDaemon(system, router)
 
   //gossip tick -> start after joining
   private lazy val gossipTask = FixedRateTask(system.scheduler, 0 millis, 2000 millis) {    

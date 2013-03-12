@@ -27,7 +27,7 @@ class Stabilizer(system: ActorSystem, router: Router) {
 
   // Create the master
   val master = system.actorOf(Props(new Master).withDeploy(Deploy(scope = RemoteScope(router.self))), name = "stabilizer")
-  logger.info("Node stabiliser start")
+  logger.info("Node Stabiliser start")
   
   class Master extends Actor {
     import Status._
