@@ -1,7 +1,9 @@
 package net.khonda.eris
 
-case class Column(name: String)
+import akka.util._
 
-case class ColumnFamily(key: Long, value: Array[Column])
+case class Column(name: String, value: ByteString, timestamp: Long) extends NodeMessage
 
-case class KeySpace(keyspace: String, value: Array[ColumnFamily])
+case class ColumnFamily(key: Long, value: Array[Column]) extends NodeMessage
+
+case class KeySpace(keyspace: String, value: Array[ColumnFamily]) extends NodeMessage
