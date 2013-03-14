@@ -47,8 +47,7 @@ object Eris extends Build {
       // ---- test dependencies ----
       "com.typesafe.akka" %% "akka-testkit" % "2.2-M1" % "test" ,
       "com.typesafe.akka" %% "akka-multi-node-testkit" % "2.2-M1" % "test" ,
-      "org.scalatest"     %% "scalatest" % "1.9.1" % "test",
-      "junit"              % "junit" % "4.5" % "test"
+      "org.specs2" %% "specs2" % "1.14" % "test"
    )
   }
 
