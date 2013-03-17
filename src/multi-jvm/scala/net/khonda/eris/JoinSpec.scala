@@ -1,4 +1,4 @@
-package example
+package net.khonda.eris
  
 import org.scalatest.{ BeforeAndAfterAll, WordSpec }
 import org.scalatest.matchers.MustMatchers
