@@ -1,6 +1,7 @@
-package net.khonda.eris
+package net.khonda.eris.column
 
 import akka.util._
+import net.khonda.eris._
 
 object ConsistencyLevel extends Enumeration {				
   val ZERO, ONE, QUORUM, ALL = Value
