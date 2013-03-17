@@ -6,7 +6,7 @@ class ColumnBuilder {
   }
   
   def result(): ColumnFamily = {   
-    ColumnFamily(100L, "hoge", new Array[Column](10))
+    ColumnFamily(100L, "hoge", List[Column]())
   }
 
 }
