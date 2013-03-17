@@ -9,6 +9,9 @@ object ConsistencyLevel extends Enumeration {
 
 case class Column(name: String, value: ByteString, timestamp: Long) extends NodeMessage
 
-case class ColumnFamily(key: Long, name: String, value: List[Column]) extends NodeMessage
+case class ColumnFamily(key: Long, name: String, value: List[Column]) extends NodeMessage {
+  def newBuilder: Unit = {
+  }
+}
 
 case class KeySpace(keyspace: String, value: List[ColumnFamily]) extends NodeMessage
