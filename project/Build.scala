@@ -36,8 +36,8 @@ object Eris extends Build {
   object Dependencies {
     val libs = Seq(
       // ---- application dependencies ----
-      "com.typesafe.akka" %% "akka-actor" % "2.2-M1",
-      "com.typesafe.akka" %% "akka-remote" % "2.2-M1",
+      "com.typesafe.akka" %% "akka-actor" % "2.2-M2",
+      "com.typesafe.akka" %% "akka-remote" % "2.2-M2",
       "com.typesafe.akka" %% "akka-slf4j" % "2.1.1",
       "com.typesafe.slick" %% "slick" % "1.0.0",
       "postgresql" % "postgresql" % "9.1-901.jdbc4",      
@@ -45,8 +45,8 @@ object Eris extends Build {
       "ch.qos.logback" % "logback-core" % "1.0.7" % "compile",
       "ch.qos.logback" % "logback-classic" % "1.0.7" % "runtime",
       // ---- test dependencies ----
-      "com.typesafe.akka" %% "akka-testkit" % "2.2-M1" % "test" ,
-      "com.typesafe.akka" %% "akka-multi-node-testkit" % "2.2-M1" % "test" ,
+      "com.typesafe.akka" %% "akka-testkit" % "2.2-M2" % "test" ,
+      "com.typesafe.akka" %% "akka-multi-node-testkit" % "2.2-M2" % "test" ,
       "org.specs2" %% "specs2" % "1.14" % "test"
    )
   }
