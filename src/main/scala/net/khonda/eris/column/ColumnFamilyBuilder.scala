@@ -9,7 +9,13 @@ class ColumnFamilyBuilder {
     ColumnFamily(100L, "hoge", List[Column]())
   }
 
-  def putDouble(x: Double): Unit = {
+  def putDouble(name: String, value: Double): Unit = {
+  }
+
+  def putLong(name: String, value: Long): Unit = {
+  }
+
+  def putString(name: String, value: String): Unit = {
   }
 
 }
