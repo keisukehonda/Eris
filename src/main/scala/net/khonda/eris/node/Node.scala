@@ -28,8 +28,7 @@ case class Route(id: String,
 		 port: Int,
                  node_state: Status,
 		 db_state: Status,
-		 dbhost: String,
-		 dbport: Int,
+		 mydb: Address,
 		 score: Int) extends NodeMessage
 
 case class RoutingTable(version: Long = 0L,
@@ -192,8 +191,9 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
   }
 
   lazy val mydb: Address = {
-    val port = ConfigFactory.load().getConfig(config.db_no).getInt("akka.remote.netty.tcp.port")
-    val db = config.getUri(config.db._1, port)
+    val host = ConfigFactory.load().getConfig(config.db_no).getString("akka.remote.netty.tcp.hostname")
+    val port = ConfigFactory.load().getConfig(config.db_no).getInt("akka.remote.netty.tcp.port")    
+    val db = config.getUri(host, port)
     AddressFromURIString(db)
   }
 
@@ -210,11 +210,11 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
 
   lazy val node: Route = {
     val id = nodeid
-    val score = 1
-    val db = config.db
+    val port = ConfigFactory.load().getConfig(config.app_no).getInt("akka.remote.netty.tcp.port")
+    val score = 1    
     val node_state = Status.Joining
-    val db_state = Status.Joining
-    Route(id, self.toString, config.port, node_state, db_state, db._1, db._2 , score)
+    val db_state = Status.Joining    
+    Route(id, self.toString, port, node_state, db_state, mydb, score)
   }
   
   def calcHostId(hostname: String): String = {    

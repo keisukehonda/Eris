@@ -8,11 +8,9 @@ trait Eris {
   def db_mode: Boolean
   def app_no: String
   def db_no: String
-  def hostname: String
-  def port: Int  
+  def hostname: String 
   def lookup: (String, Int)
-  def autoJoin: Boolean
-  def db: (String, Int) //thrift port
+  def autoJoin: Boolean 
   def db_user: String
   def db_pass: String
 
