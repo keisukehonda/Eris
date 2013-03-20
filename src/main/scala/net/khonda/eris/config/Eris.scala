@@ -7,8 +7,7 @@ trait Eris {
 
   def db_mode: Boolean
   def app_no: String
-  def db_no: String
-  def hostname: String 
+  def db_no: String  
   def lookup: (String, Int)
   def autoJoin: Boolean 
   def db_user: String
@@ -21,7 +20,5 @@ trait Eris {
   def failuredetector_acceptableHeartbeatPause: FiniteDuration
   def failuredetector_firstHeartbeatEstimate: FiniteDuration
   def stabi_seq: FiniteDuration
-
-  def getUri(hostname: String, port: Int): String = "akka.tcp://ChordSystem-"+port+"@"+hostname+":"+port
 
 }

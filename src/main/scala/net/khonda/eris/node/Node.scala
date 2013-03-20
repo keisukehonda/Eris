@@ -90,7 +90,7 @@ class Node(config: ErisConfig) extends Peer{
 
 
   //join to cluster using lookup node and check i am newcomer or rejoin
-  val (accept, isReJoin) = join(AddressFromURIString(config.getUri(config.lookup._1, config.lookup._2)))
+  val (accept, isReJoin) = join(AddressFromURIString(getUri(config.lookup._1, config.lookup._2)))
   
   //
   //Interface NodeAction call from Thrift client
@@ -172,7 +172,7 @@ object Router {
 
 }
 
-class Router private (system: ActorSystem, config: ErisConfig, failureDetector: FailureDetector) {
+class Router private (system: ActorSystem, config: ErisConfig, failureDetector: FailureDetector) extends Peer {
   import Status._
 
   val logger = LoggerFactory.getLogger(classOf[Router])
@@ -184,24 +184,14 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
     new AtomicReference[State](State(latest))
   }
 
-  lazy val self: Address = {
-    val port = ConfigFactory.load().getConfig(config.app_no).getInt("akka.remote.netty.tcp.port")
-    val local = config.getUri(config.hostname, port)
-    AddressFromURIString(local)
-  }
-
-  lazy val mydb: Address = {
-    val host = ConfigFactory.load().getConfig(config.db_no).getString("akka.remote.netty.tcp.hostname")
-    val port = ConfigFactory.load().getConfig(config.db_no).getInt("akka.remote.netty.tcp.port")    
-    val db = config.getUri(host, port)
-    AddressFromURIString(db)
-  }
+  lazy val self: Address = getAddress(config.app_no)
+  lazy val mydb: Address = getAddress(config.db_no)
 
   var nodeid = if (config.autoJoin) {
     try {
       val filename ="node_status_"+config.app_no+".xml"
       val status = XML.loadFile("logs/"+filename)
-      val id=status \ "id"
+      val id = status \ "id"
       id.text
     } catch {
       case e:Exception => logger.info(e.getMessage()); ""

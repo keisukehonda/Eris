@@ -8,7 +8,6 @@ new Eris {
   val db_mode = false
   val app_no = "app_2"
   val db_no = "db_2"
-  val hostname = "127.0.0.1"
   val lookup = ("127.0.0.1", 2519)
   val autoJoin = true
   val db_user = "postgres"

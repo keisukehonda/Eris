@@ -48,4 +48,13 @@ trait Peer {
   val startTime =  java.util.Calendar.getInstance(new java.util.Locale("ja", "JP", "JP")) //TODO
   val akkaConfig = ConfigFactory.load()
 
+  def getAddress(config_no: String) = {
+    val host = ConfigFactory.load().getConfig(config_no).getString("akka.remote.netty.tcp.hostname")
+    val port = ConfigFactory.load().getConfig(config_no).getInt("akka.remote.netty.tcp.port")
+    val local = getUri(host, port)
+    AddressFromURIString(local)
+  }
+
+  def getUri(hostname: String, port: Int): String = "akka.tcp://ChordSystem-"+port+"@"+hostname+":"+port
+
 }
