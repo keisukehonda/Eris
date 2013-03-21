@@ -13,6 +13,9 @@ class ColumnFamilyBuilder {
     1
   }
 
+  def putBytes(array: Array[Byte]): Unit = {
+  }
+
   def putInt(name: String, value: Int): Unit = {
   }
 
