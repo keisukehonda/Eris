@@ -11,19 +11,22 @@ class ColumnFamilyBuilder {
 
   def length: Int = {
     1
-  }
+  }  
 
-  def putBytes(array: Array[Byte]): Unit = {
+  def putByte(array: Array[Byte]): Unit = {
   }
 
   def putInt(name: String, value: Int): Unit = {
   }
 
-  def putDouble(name: String, value: Double): Unit = {
+  def putFloat(name: String, value: Float): Unit = {
   }
 
   def putLong(name: String, value: Long): Unit = {
   }
+  
+  def putDouble(name: String, value: Double): Unit = {
+  }  
 
   def putString(name: String, value: String): Unit = {
   }
