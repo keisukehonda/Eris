@@ -15,6 +15,12 @@ import com.typesafe.config.ConfigFactory
 
 trait NodeMessage extends Serializable
 
+//CONSISTENCY LEVEL
+object ConsistencyLevel extends Enumeration {				
+  type ConsistencyLevel = Value
+  val ZERO, ONE, QUORUM, ALL = Value
+}
+
 //INTERNL API
 case class Join(from: Route) extends NodeMessage
 case class Heartbeat(from: Address) extends NodeMessage

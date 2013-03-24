@@ -17,6 +17,7 @@ object Client {
 
 class Client private(val client_no: String, val server: String, val server_port: Int) extends Peer {
   import net.khonda.eris.column._
+  import ConsistencyLevel._
     
   val logger = LoggerFactory.getLogger(classOf[Client])
   //create akka system  
@@ -50,7 +51,12 @@ class Client private(val client_no: String, val server: String, val server_port:
   }
 
   //public API for User
-  def put(keyspace: String): Unit = {
+  def put(keyspace: String, 
+	  key: Long,
+	  columnPath: ColumnPath,
+	  value: Column,
+	  timestamp: Long,	  
+	  level: ConsistencyLevel): Unit = {
 
   }
 
