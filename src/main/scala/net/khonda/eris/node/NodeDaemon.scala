@@ -8,6 +8,7 @@ import akka.event.Logging
 import com.typesafe.config.ConfigFactory
 import ch.qos.logback._
 import net.khonda.eris._
+import net.khonda.eris.column._
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory
  * INTERNAL API for CRUD.
  */
 class NodeDaemon(system: ActorSystem, router: Router) {
+  import ConsistencyLevel._
 
   val logger = LoggerFactory.getLogger(classOf[NodeDaemon])
   val selfAddress = router.self
@@ -28,6 +30,14 @@ class NodeDaemon(system: ActorSystem, router: Router) {
   class Master extends Actor {
 
     def receive = {
+      case Put(keyspace: String,
+	       key: Long,
+	       columnPath: ColumnPath,
+	       value: Column,
+	       timestamp: Long,  
+	       level: ConsistencyLevel) => {
+	println("node daemon get put message")
+      }
       case _ => {
 	println("node daemon get message")
       } 

@@ -8,10 +8,10 @@ import akka.event.Logging
 import com.typesafe.config.ConfigFactory
 import ch.qos.logback._
 import net.khonda.eris.node._
+import net.khonda.eris.column._
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import com.typesafe.config.ConfigFactory
 
 trait NodeMessage extends Serializable
 
@@ -20,6 +20,15 @@ object ConsistencyLevel extends Enumeration {
   type ConsistencyLevel = Value
   val ZERO, ONE, QUORUM, ALL = Value
 }
+import ConsistencyLevel._
+
+//PUBLIC CRUD API
+case class Put(keyspace: String,
+	       key: Long,
+	       columnPath: ColumnPath,
+	       value: Column,
+	       timestamp: Long,	  
+	       level: ConsistencyLevel) extends NodeMessage
 
 //INTERNL API
 case class Join(from: Route) extends NodeMessage
@@ -49,7 +58,7 @@ case class Gossip(
 
 }
 
-trait Peer {
+trait Peer { 
 
   val startTime =  java.util.Calendar.getInstance(new java.util.Locale("ja", "JP", "JP")) //TODO
   val akkaConfig = ConfigFactory.load()
