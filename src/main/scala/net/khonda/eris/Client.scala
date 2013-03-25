@@ -23,18 +23,27 @@ class Client private(val client_no: String, val server: String, val server_port:
   //create akka system  
   val system = ActorSystem("ChordSystem-"+client_no, ConfigFactory.load().getConfig(client_no).withFallback(akkaConfig))
 
-  lazy val self: Address = getAddress(client_no)
+  lazy val self: Address = getAddressFromConfig(client_no)
     
   //Sender and Reciever
   val sender = system.actorOf(Props(new Sender).withDeploy(Deploy(scope=RemoteScope(self))), name = "cSender")
   println("Client[Sender] start")
   val reciever = system.actorOf(Props(new Receiver).withDeploy(Deploy(scope=RemoteScope(self))), name = "cReceiver")
   println("Client[Reciever] start")
-  
+
+  def serverAddress: Address = AddressFromURIString(getUri(server, server_port))
   
   class Sender extends Actor {
 
     def receive = {
+      case Put(keyspace: String,
+	       key: Long,
+	       columnPath: ColumnPath,
+	       value: Column,
+	       timestamp: Long,	  
+	       level: ConsistencyLevel) => {
+		
+      }
       case _ => {
       }
     }
@@ -57,7 +66,7 @@ class Client private(val client_no: String, val server: String, val server_port:
 	  value: Column,
 	  timestamp: Long,	  
 	  level: ConsistencyLevel): Unit = {
-
+    sender ! Put(keyspace, key, columnPath, value, timestamp, level)
   }
 
 }

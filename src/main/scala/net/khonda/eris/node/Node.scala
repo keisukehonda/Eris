@@ -184,8 +184,8 @@ class Router private (system: ActorSystem, config: ErisConfig, failureDetector: 
     new AtomicReference[State](State(latest))
   }
 
-  lazy val self: Address = getAddress(config.app_no)
-  lazy val mydb: Address = getAddress(config.db_no)
+  lazy val self: Address = getAddressFromConfig(config.app_no)
+  lazy val mydb: Address = getAddressFromConfig(config.db_no)
 
   var nodeid = if (config.autoJoin) {
     try {

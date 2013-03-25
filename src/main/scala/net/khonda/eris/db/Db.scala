@@ -19,7 +19,7 @@ class Db(config: ErisConfig) extends Peer {
   val system = ActorSystem("ChordSystem-"+port,
 			   ConfigFactory.load().getConfig(config.db_no).withFallback(akkaConfig))
 
-  val self: Address = getAddress(config.db_no)
+  val self: Address = getAddressFromConfig(config.db_no)
 
   val stabilizer = new Stabilizer(system, self)
   
