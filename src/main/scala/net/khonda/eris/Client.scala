@@ -7,15 +7,15 @@ import ch.qos.logback._
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-object Client {
+object Client extends Peer{
 
   def apply(client_no: String, server: String, server_port: Int) = {    
-    new Client(client_no, server, server_port)
+    new Client(client_no, List(AddressFromURIString(getUri(server, server_port))))
   }
  
 }
 
-class Client private(val client_no: String, val server: String, val server_port: Int) extends Peer {
+class Client private(val client_no: String, serverList: List[Address]) extends Peer {
   import net.khonda.eris.column._
   import ConsistencyLevel._
     
@@ -31,7 +31,7 @@ class Client private(val client_no: String, val server: String, val server_port:
   val reciever = system.actorOf(Props(new Receiver).withDeploy(Deploy(scope=RemoteScope(self))), name = "cReceiver")
   println("Client[Reciever] start")
 
-  def serverAddress: Address = AddressFromURIString(getUri(server, server_port))
+  def serverAddress: Address = serverList.head
   
   class Sender extends Actor {
 
