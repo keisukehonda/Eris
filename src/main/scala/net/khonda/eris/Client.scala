@@ -9,8 +9,12 @@ import org.slf4j.LoggerFactory
 
 object Client extends Peer{
 
-  def apply(client_no: String, server: String, server_port: Int) = {    
-    new Client(client_no, List(AddressFromURIString(getUri(server, server_port))))
+  def apply(client_no: String, server: String, server_port: Int): Client = {    
+    apply(client_no, List(AddressFromURIString(getUri(server, server_port))))
+  }
+
+  def apply(client_no: String, serverList: List[Address]): Client = {
+    new Client(client_no, serverList)
   }
  
 }
@@ -31,6 +35,7 @@ class Client private(val client_no: String, serverList: List[Address]) extends P
   val reciever = system.actorOf(Props(new Receiver).withDeploy(Deploy(scope=RemoteScope(self))), name = "cReceiver")
   println("Client[Reciever] start")
 
+  //TODO randamize or signle target
   def serverAddress: Address = serverList.head
   
   class Sender extends Actor {
