@@ -20,7 +20,15 @@ case class ColumnFamily(key: Long, name: String, value: List[Column]) extends No
 
 case class KeySpace(keyspace: String, value: List[ColumnFamily]) extends NodeMessage
 
-case class ColumnPath(keyspace: String, columnFamily: String) extends NodeMessage {
+object ColumnPath extends NodeMessage {
+
+  def apply(keyspace: String, columnFamily: String): ColumnPath = {
+    new ColumnPath(keyspace, columnFamily)
+  }
+
+}
+
+class ColumnPath(keyspace: String, columnFamily: String) extends NodeMessage {
 
   def setColumn(column: Column) = {
   }
