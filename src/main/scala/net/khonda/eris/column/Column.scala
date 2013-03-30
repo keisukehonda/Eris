@@ -14,7 +14,9 @@ case class ColumnFamily(key: Long, name: String, value: List[Column]) extends No
 
   def isEmpty: Boolean = value.isEmpty
 
-  def length: Int = value.length   
+  def length: Int = value.length
+  
+  def size: Int = length
 
 }
 
