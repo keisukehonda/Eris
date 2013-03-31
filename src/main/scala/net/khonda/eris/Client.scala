@@ -74,4 +74,7 @@ class Client private(val client_no: String, serverList: List[Address]) extends P
     sender ! Put(keyspace, key, columnPath, value, timestamp, level)
   }
 
+  def get() = {
+  }
+
 }
